@@ -36,5 +36,15 @@ public class HomeController {
         redirectAttributes.addAttribute("error", true);
         return "redirect:/login";
     }
+    
+    @GetMapping("/manager")
+    public String ManagerPage() {
+        return "manager"; 
+    }
+    
+    @GetMapping("/staff")
+    public String StaffPage() {
+    	return "staff";
+    }
 }
 

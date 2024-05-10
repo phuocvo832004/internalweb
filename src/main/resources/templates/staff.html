@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: #007bff;
+        }
+
+        .navbar-brand {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-item .nav-link {
+            color: black;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-item .nav-link:hover {
+            color: gray;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sidebar */
+        .card {
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        .card:hover{
+            
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+
+        .card-header {
+            background-color: #cc6600;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        /* Nội dung trang */
+        h2 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        hr {
+            border-color: #007bff;
+        }
+
+        /* Bảng thông báo */
+        .notification-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+
+        /* Phân trang */
+        .pagination .page-link {
+            color: #007bff;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+
+        /* CSS cho lựa chọn yêu cầu */
+        .request-options {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .show-options {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+    
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Internal Web</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Giới thiệu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Thông báo</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Lịch phòng</a>
+                </li>
+                <li class="nav-item request dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="showOptions()">Yêu
+                        cầu</a>
+                    <!-- Thêm phần tử chứa các lựa chọn -->
+                    <div class="dropdown-menu request-options" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Tạo yêu cầu</a>
+                        <a class="dropdown-item" href="#">Xem yêu cầu đã gửi</a>
+                        <a class="dropdown-item" href="#">Xử lý yêu cầu</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Thông tin cá nhân</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        Yêu cầu đang xử lý
+                    </div>
+                    <div class="card-body">
+                    </div>
+                </div>
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Yêu cầu chưa xử lý
+                    </div>
+                    <div class="card-body">
+                    </div>
+                </div>
+            </div>
+            <!-- Nội dung trang -->
+            <div class="col-md-9">
+                <h2>Danh sách thông báo</h2>
+                <hr>
+                <!-- Danh sách thông báo -->
+                <div class="row" id="notificationList">
+                    <!-- Dữ liệu từ API sẽ được thêm vào đây -->
+                </div>
+                <!-- Phân trang -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script th:inline="javascript">
+        fetch('/api/internal-news')
+            .then(response => response.json())
+            .then(data => {
+                // Xử lý dữ liệu nhận được và cập nhật nội dung của trang
+                var notificationList = document.getElementById('notificationList');
+                data.forEach(news => {
+                    var item = document.createElement('div');
+                    item.classList.add('col-md-4', 'mb-4');
+                    item.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${news.title}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">${news.datePosted}</h6>
+                                <p class="card-text">${news.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    notificationList.appendChild(item);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+
+    <script>
+        function showOptions() {
+            var requestOptions = document.querySelector('.request-options');
+            requestOptions.classList.toggle('show-options');
+        }
+    </script>
+</body>
+</html>
