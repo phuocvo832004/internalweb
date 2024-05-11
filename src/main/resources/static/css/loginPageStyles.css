@@ -29,7 +29,7 @@
         }
 
         .custom-form {
-            max-width: 350px;
+            min-width: 350px;
             width: 100%;
             filter: none !important;
         }

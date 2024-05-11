@@ -2,6 +2,9 @@ package com.internalweb.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.internalweb.model.InternalNews;
@@ -15,6 +18,10 @@ public class InternalNewsServiceImpl implements InternalNewsService {
 
     @Autowired
     private InternalNewsRepository internalNewsRepository;
+    
+    public InternalNewsServiceImpl(InternalNewsRepository internalNewsRepository) {
+        this.internalNewsRepository = internalNewsRepository;
+    }
 
     @Override
     public List<InternalNews> findByTitleContaining(String keyword) {
@@ -22,8 +29,9 @@ public class InternalNewsServiceImpl implements InternalNewsService {
     }
 
     @Override
-    public List<InternalNews> findAll() {
-        return internalNewsRepository.findAll();
+    public Page<InternalNews> findAll(int page, int size) {
+    	PageRequest pageable = PageRequest.of(page - 1, size);
+    	return internalNewsRepository.findAll(pageable);
     }
 
     @Override
@@ -41,4 +49,11 @@ public class InternalNewsServiceImpl implements InternalNewsService {
     public void deleteById(Long id) {
         internalNewsRepository.deleteById(id);
     }
+    
+    @Override
+    public ResponseEntity<InternalNews> getNewsById(Long newsId) {
+        Optional<InternalNews> news = internalNewsRepository.findById(newsId);
+        return news.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
 }

@@ -46,6 +46,9 @@
                             <h4 class="text-center">Login</h4>
                         </div>
                         <div class="card-body">
+                            <div th:if="${param.error != null}" class="alert alert-danger" role="alert">
+                                Username or password is incorrect!
+                            </div>
                             <form th:action="@{/login}" method="post">
                                 <div class="form-group">
                                     <label for="username">Username:</label>
