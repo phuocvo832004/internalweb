@@ -79,6 +79,12 @@
             border-color: #007bff;
             color: #fff;
         }
+        
+        .custom-size {
+		    width: 150px;
+		    height: 150px;
+		}
+        
 
         /* CSS cho lựa chọn yêu cầu */
         .request-options {

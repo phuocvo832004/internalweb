@@ -46,5 +46,10 @@ public class HomeController {
     public String StaffPage() {
     	return "staff";
     }
+    
+    @GetMapping("/introduction")
+    public String IntroductionPage() {
+    	return "introduction";
+    }
 }
 
