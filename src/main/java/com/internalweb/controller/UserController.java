@@ -109,7 +109,7 @@ public class UserController {
 
  private String saveAvatarFile(MultipartFile file) throws IOException {
 
-     String uploadsDir = "uploads/";
+     String uploadsDir = "./images/";
      String originalFilename = file.getOriginalFilename();
      String filePath = uploadsDir + originalFilename;
 

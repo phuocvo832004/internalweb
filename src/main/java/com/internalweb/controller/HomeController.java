@@ -53,7 +53,6 @@ public class HomeController {
     public String staffPage(HttpSession session, Model model) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
             model.addAttribute("loggedInUser", loggedInUser);
-            System.out.print(loggedInUser);
             return "staff";
         
     }

@@ -323,7 +323,6 @@
         const email = document.getElementById('email').value;
         const position = document.getElementById('position').value;
         const department = document.getElementById('department').value;
-        const avatar = document.getElementById('avatarPreview').src;
 
         const updatedUser = {
             fullName: fullName,
@@ -331,12 +330,11 @@
             email: email,
             position: position,
             department: department,
-            avatar: avatar
         };
 
         $.ajax({
             url: `/api/users/${userId}`,
-            method: 'PUT',
+            method: 'PATCH',
             contentType: 'application/json',
             data: JSON.stringify(updatedUser),
             success: function(response) {
