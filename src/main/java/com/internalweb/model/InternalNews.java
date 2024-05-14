@@ -24,19 +24,23 @@ public class InternalNews {
     
     @Column(name = "DatePosted")
     private Date datePosted;
+    
+    @Column(name = "UserId")
+    private Long userId;
 
 	public InternalNews() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public InternalNews(Long newsId, String title, String content, String author, Date datePosted) {
+	public InternalNews(Long newsId, String title, String content, String author, Date datePosted, Long userId) {
 		super();
 		this.newsId = newsId;
 		this.title = title;
 		this.content = content;
 		this.author = author;
 		this.datePosted = datePosted;
+		this.userId = userId;
 	}
 
 	public Long getNewsId() {
@@ -78,7 +82,16 @@ public class InternalNews {
 	public void setDatePosted(Date datePosted) {
 		this.datePosted = datePosted;
 	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
     
+	
     
 }
 

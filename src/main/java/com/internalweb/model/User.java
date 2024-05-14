@@ -17,7 +17,7 @@ public class User {
     @Column(name = "Password")
     private String password;
     
-    @Column(name = "FullName")
+    @Column(name = "Full_Name")
     private String fullName;
     
     @Column(name = "Phone")
@@ -34,6 +34,9 @@ public class User {
     
     @Column(name = "Role")
     private String role;
+    
+    @Column(name = "Avatar")
+    private String avatar;
 
 	public User() {
 		super();
@@ -41,7 +44,7 @@ public class User {
 	}
 
 	public User(Long userId, String username, String password, String fullName, String phone, String email,
-			String position, String department, String role) {
+			String position, String department, String role, String avatar) {
 		super();
 		this.userId = userId;
 		this.username = username;
@@ -52,6 +55,7 @@ public class User {
 		this.position = position;
 		this.department = department;
 		this.role = role;
+		this.avatar = avatar;
 	}
 
 	public Long getUserId() {
@@ -125,6 +129,16 @@ public class User {
 	public void setRole(String role) {
 		this.role = role;
 	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+	
+	
     
     
 }

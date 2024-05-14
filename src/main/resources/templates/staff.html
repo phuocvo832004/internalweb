@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Page</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/staffPageStyles.css}" />
 
 </head>
@@ -23,9 +26,6 @@
                     <a class="nav-link" href="http://localhost:8080/introduction">Giới thiệu</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Thông báo</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="#">Lịch phòng</a>
                 </li>
                 <li class="nav-item request dropdown">
@@ -40,7 +40,7 @@
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Thông tin cá nhân</a>
+                    <a class="nav-link" href="#" onclick="showPersonalInfoModal()">Thông tin cá nhân</a>
                 </li>
             </ul>
         </div>
@@ -89,8 +89,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-4">
-                        <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle random-avatar custom-size"
-                            alt="Author Avatar">
+                        <img id="modalAvatar" src="https://via.placeholder.com/150"
+                            class="img-fluid rounded-circle custom-size random-avatar" alt="Author Avatar">
                         <h4 class="mt-2" id="modalAuthor">Tác giả</h4>
                         <p class="text-muted">Ngày đăng: <span id="modalDatePosted">01/01/2024</span></p>
                     </div>
@@ -106,7 +106,59 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         style="background-color: #cc6600;">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="modal fade" id="personalInfoModal" tabindex="-1" role="dialog" aria-labelledby="personalInfoModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="personalInfoModalLabel">Thông tin cá nhân</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <label for="avatarUpload" class="d-block mb-3">
+                            <img id="avatarPreview" th:src="${loggedInUser.avatar}" alt="Avatar"
+                                class="avatar-image rounded-circle" style="height: 200px; width: 200px;">
+                        </label>
+                        <span class="text-primary" style="cursor:pointer"
+                            onclick="document.getElementById('avatarUpload').click()">Thay đổi hình đại diện</span>
+                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;"
+                            onchange="previewAvatar(event)">
+                    </div>
+                    <form id="personalInfoForm">
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên: </label>
+                            <input type="text" class="form-control" id="fullName" th:value="${loggedInUser.fullName}">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại:</label>
+                            <input type="text" class="form-control" id="phone" th:value="${loggedInUser.phone}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="text" class="form-control" id="email" th:value="${loggedInUser.email}">
+                        </div>
+                        <div class="form-group">
+                            <label for="position">Chức vụ:</label>
+                            <input type="text" class="form-control" id="position" th:value="${loggedInUser.position}">
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Phòng ban:</label>
+                            <input type="text" class="form-control" id="department"
+                                th:value="${loggedInUser.department}">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="confirmUpdatePersonalInfo()" data-dismiss="modal">Lưu thay đổi</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                 </div>
             </div>
         </div>
@@ -119,6 +171,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
+
         document.addEventListener('DOMContentLoaded', function () {
             // Mảng chứa các URL của các hình ảnh đại diện
             var avatars = [
@@ -133,9 +186,38 @@
 
             document.querySelector('.random-avatar').src = randomAvatar;
         });
-    </script>
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById('avatarPreview').src = reader.result;
+                // Gửi tệp đến máy chủ để cập nhật avatar
+                updateAvatar(file);
+            };
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
 
-    <script th:inline="javascript">
+        function updateAvatar(file) {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            $.ajax({
+                url: '/api/users/update-avatar', // Endpoint để cập nhật avatar
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Avatar đã được cập nhật thành công!');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating avatar:', error);
+                }
+            });
+        }
+
         var currentPage = 1;
         var totalPages = 2;
 
@@ -219,16 +301,52 @@
             currentPage = page;
             loadDataAndPagination();
         }
-    </script>
 
-
-
-
-    <script>
         function showOptions() {
             var requestOptions = document.querySelector('.request-options');
             requestOptions.classList.toggle('show-options');
         }
+            function showPersonalInfoModal() {
+        $('#personalInfoModal').modal('show');
+    }
+    
+        function confirmUpdatePersonalInfo() {
+        if (confirm("Bạn có chắc chắn muốn lưu thay đổi không?")) {
+            updatePersonalInfo();
+        }
+    }
+
+     function updatePersonalInfo() {
+        const userId = 1;
+        const fullName = document.getElementById('fullName').value;
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        const position = document.getElementById('position').value;
+        const department = document.getElementById('department').value;
+        const avatar = document.getElementById('avatarPreview').src;
+
+        const updatedUser = {
+            fullName: fullName,
+            phone: phone,
+            email: email,
+            position: position,
+            department: department,
+            avatar: avatar
+        };
+
+        $.ajax({
+            url: `/api/users/${userId}`,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(updatedUser),
+            success: function(response) {
+                alert('Thông tin cá nhân đã được cập nhật thành công.');
+            },
+            error: function(xhr) {
+                alert('Đã có lỗi xảy ra: ' + xhr.responseText);
+            }
+        });
+    }
     </script>
 </body>
 
