@@ -40,5 +40,16 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
+    
+    @Override
+    public List<User> findAllByRole(String role){
+    	List<User> staff = userRepository.findAllByRole(role);
+    	return staff;
+    }
+    
+    @Override
+    public List<User> searchStaff(String query) {
+        return userRepository.findByFullNameContainingIgnoreCaseOrDepartmentContainingIgnoreCaseOrPositionContainingIgnoreCase(query, query, query);
+    }
 }
 

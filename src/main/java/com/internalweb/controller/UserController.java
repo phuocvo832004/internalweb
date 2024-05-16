@@ -3,11 +3,11 @@ package com.internalweb.controller;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.internalweb.model.User;
-import com.internalweb.model.UserAvatarResponse;
-import com.internalweb.repository.UserRepository;
+import com.internalweb.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -30,11 +29,51 @@ import jakarta.servlet.http.HttpSession;
 public class UserController {
 
  @Autowired
- private UserRepository userRepository;
+ private UserService userService;
+ 
+ @GetMapping("/users/staff/search")
+ public List<User> searchStaff(@RequestParam String query) {
+     return userService.searchStaff(query);
+ }
+ 
+ @GetMapping("/users/staff")
+ public List<User> getAllStaff(Model model){
+	 return userService.findAllByRole("staff");
+ }
+ 
+ @DeleteMapping("/users/{userId}")
+ public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+     User existingUser = userService.findById(userId);
+     if (existingUser == null) {
+         return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+     }
+
+     userService.deleteById(existingUser.getUserId());
+
+     return new ResponseEntity<>("Người dùng đã được xóa thành công", HttpStatus.OK);
+ }
+ 
+ @PostMapping("/users/create")
+ public ResponseEntity<String> createUser(@RequestBody User newUser) {
+     if(newUser == null ) {
+         return new ResponseEntity<>("Dữ liệu người dùng không hợp lệ", HttpStatus.BAD_REQUEST);
+     }
+
+     User existingUser = userService.findByUsername(newUser.getUsername());
+     if (existingUser != null) {
+         return new ResponseEntity<>("Username đã tồn tại", HttpStatus.CONFLICT);
+     }
+
+     userService.save(newUser);
+
+     return new ResponseEntity<>("Người dùng đã được tạo thành công", HttpStatus.CREATED);
+ }
+
+
 
  @PutMapping("/users/{userId}")
  public ResponseEntity<String> updateUser(@PathVariable Long userId, @RequestBody User updatedUser) {
-     User existingUser = userRepository.findById(userId).orElse(null);
+     User existingUser = userService.findById(userId);
      if (existingUser == null) {
          return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
      }
@@ -46,14 +85,14 @@ public class UserController {
      existingUser.setDepartment(updatedUser.getDepartment());
      existingUser.setAvatar(updatedUser.getAvatar());
 
-     userRepository.save(existingUser);
+     userService.save(existingUser);
 
      return new ResponseEntity<>("Thông tin cá nhân đã được cập nhật thành công", HttpStatus.OK);
  }
  
  @PatchMapping("/users/{userId}")
  public ResponseEntity<String> patchUser(@PathVariable Long userId, @RequestBody Map<String, Object> updates) {
-     User existingUser = userRepository.findById(userId).orElse(null);
+     User existingUser = userService.findById(userId);
      if (existingUser == null) {
          return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
      }
@@ -80,7 +119,7 @@ public class UserController {
          }
      });
 
-     userRepository.save(existingUser);
+     userService.save(existingUser);
 
      return new ResponseEntity<>("Thông tin cá nhân đã được cập nhật thành công", HttpStatus.OK);
  }
@@ -98,7 +137,7 @@ public class UserController {
          String avatarPath = saveAvatarFile(avatarFile);
          loggedInUser.setAvatar(avatarPath);
 
-         userRepository.save(loggedInUser);
+         userService.save(loggedInUser);
          session.setAttribute("loggedInUser", loggedInUser);
 
          return new ResponseEntity<>("Avatar đã được cập nhật thành công", HttpStatus.OK);

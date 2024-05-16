@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Internal News Management</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/staffPageStyles.css}" />
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="nav-left">
+            <a class="navbar-brand" href="http://localhost:8080/introduction">Internal Web 💀</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="manageNotificationsLink">Quản lý thông báo</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="nav-right active">
+            <a href="http://localhost:8080/manager" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt"></i> Back
+            </a>
+            <a href="/logout" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-md-9">
+                <h2>Danh sách thông báo</h2>
+                <hr>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" id="searchQuery" class="form-control" placeholder="Tìm kiếm thông báo...">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" onclick="searchNotifications()">Tìm kiếm</button>
+                    </div>
+                </div>
+                <div class="row" id="notificationList">
+                    <!-- Notification cards will be populated here by JavaScript -->
+                </div>
+                <div id="pagination" class="mt-3">
+                    <!-- Pagination links will be populated here by JavaScript -->
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        Quản lý thông báo
+                    </div>
+                    <div class="card-body"
+                        style="display: flex; gap: 5vw; justify-content: center; align-items: center;">
+                        <button class="btn btn-success" onclick="showAddModal()">Tạo thông báo</button>
+                        <button class="btn btn-danger" onclick="deleteSelected()">Xóa thông báo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for editing notification details -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Chỉnh sửa thông tin thông báo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Edit form -->
+                    <form id="editForm">
+                        <input type="hidden" class="form-control" id="editId">
+                        <div class="form-group">
+                            <label for="editTitle">Tiêu đề</label>
+                            <input type="text" class="form-control" id="editTitle">
+                        </div>
+                        <div class="form-group">
+                            <label for="editContent">Nội dung</label>
+                            <textarea class="form-control" id="editContent" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="saveChanges()">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding new notification -->
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addModalLabel">Thêm thông báo mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Add form -->
+                    <form id="addForm">
+                        <div class="form-group">
+                            <label for="addTitle">Tiêu đề</label>
+                            <input type="text" class="form-control" id="addTitle">
+                        </div>
+                        <div class="form-group">
+                            <label for="addContent">Nội dung</label>
+                            <textarea class="form-control" id="addContent" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="addNotification()">Thêm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchNotifications();
+        });
+
+        function searchNotifications() {
+            const query = document.getElementById('searchQuery').value;
+            fetch(`/api/internal-news/search?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    populateNotificationList(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function populateNotificationList(data) {
+            const notificationList = document.getElementById('notificationList');
+            notificationList.innerHTML = '';
+            data.forEach(notification => {
+                const card = document.createElement('div');
+                card.className = 'col-md-3';
+                card.innerHTML = `
+            <div class="card">
+                <div class="card-header" style="background-color: #cc6600; color: white;">
+                    <input type="checkbox" class="form-check-input" id="checkNotification${notification.notificationId}">
+                    ${notification.title}
+                </div>
+                <div class="card-body">
+                    <p class="card-text">${notification.content}</p>
+                    <button class="btn btn-secondary" onclick="showEditModal(${notification.notificationId}, '${notification.title}', '${notification.content}')">Chỉnh sửa</button>
+                </div>
+            </div>
+        `;
+                notificationList.appendChild(card);
+            });
+        }
+
+        function fetchNotifications() {
+            fetch('/api/internal-news')
+                .then(response => response.json())
+                .then(data => {
+                    const notificationList = document.getElementById('notificationList');
+                    notificationList.innerHTML = '';
+                    data.forEach(notification => {
+                        const card = document.createElement('div');
+                        card.className = 'col-md-3';
+                        card.innerHTML = `
+                        <div class="card">
+                            <div class="card-header" style="background-color: #cc6600; color: white;">
+                                <input type="checkbox" class="form-check-input" id="checkNotification${notification.notificationId}">
+                                ${notification.title}
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">${notification.content}</p>
+                                <button class="btn btn-secondary" onclick="showEditModal(${notification.notificationId}, '${notification.title}', '${notification.content}')">Chỉnh sửa</button>
+                            </div>
+                        </div>
+                    `;
+                        notificationList.appendChild(card);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function showEditModal(id, title, content) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editContent').value = content;
+            $('#editModal').modal('show');
+        }
+
+        function saveChanges() {
+            const id = parseInt(document.getElementById('editId').value, 10);
+            const title = document.getElementById('editTitle').value;
+            const content = document.getElementById('editContent').value;
+            fetch(`/api/internal-news/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({title, content}),
+            })
+                .then(data => {
+                    $('#editModal').modal('hide');
+                    fetchNotifications();
+                });
+        }
+
+        function showAddModal() {
+            document.getElementById('addForm').reset();
+            $('#addModal').modal('show');
+        }
+
+        function addNotification() {
+            const title = document.getElementById('addTitle').value;
+            const content = document.getElementById('addContent').value;
+            fetch('/api/internal-news/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({title, content}),
+            })
+                .then(data => {
+                    $('#addModal').modal('hide');
+                    fetchNotifications();
+                });
+        }
+
+        function deleteSelected() {
+            const selectedIds = []; // Mảng chứa các ID của thông báo được chọn
+            $('[id^=checkNotification]').each(function () {
+                if ($(this).is(':checked')) {
+                    const notificationId = $(this).attr('id').replace('checkNotification', '');
+                    selectedIds.push(notificationId);
+                }
+            });
+
+            if (selectedIds.length > 0) {
+                if (confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.length} thông báo đã chọn không?`)) {
+                    selectedIds.forEach(id => {
+                        fetch(`/api/internal-news/${id}`, {
+                            method: 'DELETE',
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    fetchNotifications();
+                                } else {
+                                    console.error('Error:', response.statusText);
+                                }
+                            });
+                    });
+                }
+            } else {
+                alert('Vui lòng chọn ít nhất một thông báo để xóa.');
+            }
+        }
+
+    </script>
+    <script>
+        const notifications = [];
+
+        const itemsPerPage = 16;
+
+        function displayNotifications(pageNumber) {
+            const startIndex = (pageNumber - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedNotifications = notifications.slice(startIndex, endIndex);
+
+            const notificationList = document.getElementById("notificationList");
+            notificationList.innerHTML = "";
+
+            paginatedNotifications.forEach(notification => {
+                const notificationCard = createNotificationCard(notification);
+                notificationList.appendChild(notificationCard);
+            });
+        }
+
+        function createNotificationCard(notification) {
+            // Tạo và trả về element div card thông báo
+        }
+
+        function createPaginationLinks(totalPages) {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            for (let i = 1; i <= totalPages; i++) {
+                const link = document.createElement("a");
+                link.href = "#";
+                link.textContent = i;
+                link.onclick = () => {
+                    displayNotifications(i);
+                };
+                pagination.appendChild(link);
+            }
+        }
+
+        displayNotifications(1);
+
+        const totalPages = Math.ceil(notifications.length / itemsPerPage);
+
+        createPaginationLinks(totalPages);
+    </script>
+
+</body>
+
+</html>

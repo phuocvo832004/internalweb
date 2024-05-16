@@ -22,7 +22,7 @@ public class InternalNews {
     @Column(name = "Author")
     private String author;
     
-    @Column(name = "DatePosted")
+    @Column(name = "Date_Posted")
     private Date datePosted;
     
     @Column(name = "UserId")

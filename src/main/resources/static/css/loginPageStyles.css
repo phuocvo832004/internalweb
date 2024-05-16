@@ -1,17 +1,18 @@
         @import url(https://fonts.googleapis.com/css?family=Lato);
 
-#overlay-form {
-    position: fixed;
-    top: 52.28vh;
-    right: 16.3vw;
-    transform: translate(-50%, -50%);
+        #overlay-form {
+            position: fixed;
+            top: 52.28vh;
+            right: 16.3vw;
+            transform: translate(-50%, -50%);
 
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    z-index: 9999; /* Đảm bảo form mới nằm trên cùng */
-     /* Ban đầu ẩn form mới đi */
-}
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            /* Đảm bảo form mới nằm trên cùng */
+            /* Ban đầu ẩn form mới đi */
+        }
 
         .card-body {
             background: #f8f9fa;

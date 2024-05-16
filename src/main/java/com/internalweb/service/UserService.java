@@ -9,5 +9,7 @@ public interface UserService {
     User findById(Long id);
     void save(User user);
     void deleteById(Long id);
+    List<User> findAllByRole(String role);
+    List<User> searchStaff(String query);
 }
 

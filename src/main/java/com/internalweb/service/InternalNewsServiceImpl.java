@@ -56,4 +56,9 @@ public class InternalNewsServiceImpl implements InternalNewsService {
         return news.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
+    @Override
+    public List<InternalNews> findByUserId(Long id){
+    	return internalNewsRepository.findByUserId(id);
+    }
+    
 }

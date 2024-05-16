@@ -62,5 +62,21 @@ public class HomeController {
     public String IntroductionPage() {
     	return "introduction";
     }
+    
+    @GetMapping("/logout")
+    public String handleLogout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login?logout";
+    }
+    
+    @GetMapping("/manager-qlnv")
+    public String QlnvPage() {
+    	return "manager-qlnv";
+    }
+    
+    @GetMapping("/manager-qltb")
+    public String QltbPage() {
+    	return "manager-qltb";
+    }
 }
 

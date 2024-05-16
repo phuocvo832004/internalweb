@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/staffPageStyles.css}" />
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="nav-left">
+            <a class="navbar-brand" href="http://localhost:8080/introduction">Internal Web 💀</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="http://localhost:8080/introduction">Giới thiệu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Lịch phòng</a>
+                    </li>
+                    <li class="nav-item request dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            onclick="showOptions()">Yêu cầu</a>
+                        <div class="dropdown-menu request-options" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Tạo yêu cầu</a>
+                            <a class="dropdown-item" href="#">Xem yêu cầu đã gửi</a>
+                            <a class="dropdown-item" href="#">Xử lý yêu cầu</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPersonalInfoModal()">Thông tin cá nhân</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="http://localhost:8080/manager-qlnv">Quản lý nhân viên</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="http://localhost:8080/manager-qltb">Quản lý thông báo</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="nav-right">
+            <a href="/logout" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        Yêu cầu đang xử lý
+                    </div>
+                    <div class="card-body">
+                    </div>
+                </div>
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Yêu cầu chưa xử lý
+                    </div>
+                    <div class="card-body">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <h2>Danh sách thông báo</h2>
+                <hr>
+                <div class="row" id="notificationList">
+                </div>
+                <nav aria-label="Page navigation">
+                    <ul id="pagination" class="pagination justify-content-center"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup details -->
+    <div class="modal fade" id="fullPostModal" tabindex="-1" role="dialog" aria-labelledby="fullPostModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #cc6600; color: white;">
+                    <h5 class="modal-title" id="fullPostModalLabel">Chi tiết thông báo</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <img id="modalAvatar" src="https://via.placeholder.com/150"
+                            class="img-fluid rounded-circle custom-size random-avatar" alt="Author Avatar">
+                        <h4 class="mt-2" id="modalAuthor">Tác giả</h4>
+                        <p class="text-muted">Ngày đăng: <span id="modalDatePosted">01/01/2024</span></p>
+                    </div>
+                    <div class="mb-3">
+                        <h4>Tiêu đề:</h4>
+                        <p id="modalTitle">Tiêu đề thông báo</p>
+                    </div>
+                    <div class="mb-3">
+                        <h4>Nội dung:</h4>
+                        <p id="modalContent">Nội dung thông báo</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        style="background-color: #cc6600;">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="personalInfoModal" tabindex="-1" role="dialog" aria-labelledby="personalInfoModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="personalInfoModalLabel">Thông tin cá nhân</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <label for="avatarUpload" class="d-block mb-3">
+                            <img id="avatarPreview" th:src="${loggedInUser.avatar}" alt="Avatar"
+                                class="avatar-image rounded-circle" style="height: 200px; width: 200px;">
+                        </label>
+                        <span class="text-primary" style="cursor:pointer"
+                            onclick="document.getElementById('avatarUpload').click()">Thay đổi hình đại diện</span>
+                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;"
+                            onchange="previewAvatar(event)">
+                    </div>
+                    <form id="personalInfoForm">
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên: </label>
+                            <input type="text" class="form-control" id="fullName" th:value="${loggedInUser.fullName}">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại:</label>
+                            <input type="text" class="form-control" id="phone" th:value="${loggedInUser.phone}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="text" class="form-control" id="email" th:value="${loggedInUser.email}">
+                        </div>
+                        <div class="form-group">
+                            <label for="position">Chức vụ:</label>
+                            <input type="text" class="form-control" id="position" th:value="${loggedInUser.position}"
+                                disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Phòng ban:</label>
+                            <input type="text" class="form-control" id="department"
+                                th:value="${loggedInUser.department}" disabled>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="confirmUpdatePersonalInfo()"
+                        data-dismiss="modal">Lưu thay đổi</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mảng chứa các URL của các hình ảnh đại diện
+            var avatars = [
+                './images/ava1.svg',
+                './images/ava2.svg',
+                './images/ava3.svg',
+                './images/ava4.svg'
+            ];
+
+            var randomIndex = Math.floor(Math.random() * avatars.length);
+            var randomAvatar = avatars[randomIndex];
+
+            document.querySelector('.random-avatar').src = randomAvatar;
+        });
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById('avatarPreview').src = reader.result;
+                // Gửi tệp đến máy chủ để cập nhật avatar
+                updateAvatar(file);
+            };
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateAvatar(file) {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            $.ajax({
+                url: '/api/users/update-avatar', // Endpoint để cập nhật avatar
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Avatar đã được cập nhật thành công!');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating avatar:', error);
+                }
+            });
+        }
+
+        var currentPage = 1;
+        var totalPages = 2;
+
+        $(document).ready(function () {
+            loadDataAndPagination();
+        });
+
+        function loadDataAndPagination() {
+            $.ajax({
+                url: "/api/internal-news?page=" + currentPage + "&size=9",
+                method: "GET",
+                success: function (response) {
+                    var notificationList = $('#notificationList');
+                    notificationList.empty();
+                    response.content.forEach(function (news) {
+                        var item = $('<div class="col-md-4 mb-4">' +
+                            '<div class="card">' +
+                            '<div class="card-body">' +
+                            '<h5 class="card-title">' + news.title + '</h5>' +
+                            '<h6 class="card-subtitle mb-2 text-muted">' + news.datePosted + '</h6>' +
+                            '<p class="card-text">' + news.content + '</p>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>');
+                        item.click(function () {
+
+                            showFullPost(news.newsId);
+
+                        });
+                        notificationList.append(item);
+                    });
+
+                    totalPages = response.totalPages;
+                    renderPagination();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading data:", error);
+                }
+            });
+        }
+        function showFullPost(newsId) {
+            $.ajax({
+                url: "/api/internal-news/" + newsId,
+                method: "GET",
+                success: function (response) {
+                    $('#modalTitle').text(response.title);
+                    $('#modalContent').text(response.content);
+                    $('#modalAuthor').text(response.author);
+                    $('#modalDatePosted').text(response.datePosted);
+                    $('#fullPostModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading full post:", error);
+                }
+            });
+        }
+
+
+
+        function renderPagination() {
+            var paginationHtml = '';
+
+            paginationHtml += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + '">';
+            paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + (currentPage - 1) + ')">Previous</a>';
+            paginationHtml += '</li>';
+
+            for (var i = 1; i <= totalPages; i++) {
+                paginationHtml += '<li class="page-item ' + (i === currentPage ? 'active' : '') + '">';
+                paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + i + ')">' + i + '</a>';
+                paginationHtml += '</li>';
+            }
+
+            paginationHtml += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + '">';
+            paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + (currentPage + 1) + ')">Next</a>';
+            paginationHtml += '</li>';
+
+            $('.pagination').html(paginationHtml);
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadDataAndPagination();
+        }
+
+        function showOptions() {
+            var requestsOptions = document.querySelector('.request-options');
+            requestsOptions.classList.toggle('show-options');
+        }
+        function showPersonalInfoModal() {
+            $('#personalInfoModal').modal('show');
+        }
+
+        function confirmUpdatePersonalInfo() {
+            if (confirm("Bạn có chắc chắn muốn lưu thay đổi không?")) {
+                updatePersonalInfo();
+            }
+        }
+
+        function updatePersonalInfo() {
+            const userId = 1;
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const position = document.getElementById('position').value;
+            const department = document.getElementById('department').value;
+
+            const updatedUser = {
+                fullName: fullName,
+                phone: phone,
+                email: email,
+                position: position,
+                department: department,
+            };
+
+            $.ajax({
+                url: `/api/users/${userId}`,
+                method: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedUser),
+                success: function (response) {
+                    alert('Thông tin cá nhân đã được cập nhật thành công.');
+                },
+                error: function (xhr) {
+                    alert('Đã có lỗi xảy ra: ' + xhr.responseText);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('#manageStaffLink').click(function (event) {
+                event.preventDefault();
+                loadStaffList();
+            });
+
+            function loadStaffList() {
+                $.ajax({
+                    url: "/api/users/staff",
+                    method: "GET",
+                    success: function (data) {
+                        var content = `
+                    <h2>Danh sách nhân viên</h2>
+                    <hr>
+                    <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên người dùng</th>
+                    <th>Vai trò</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${staff}">
+                    <td th:text="${user.fullName}"></td>
+                    <td th:text="${user.phone}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td th:text="${user.position}"></td>
+                    <td th:text="${user.department}"></td>
+                    
+                </tr>
+            </tbody>
+        </table>`;
+                        $('#content').html(content);
+                    },
+                    error: function (error) {
+                        console.log("Error:", error);
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+
+</html>

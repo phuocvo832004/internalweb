@@ -15,34 +15,40 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Internal Web</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="http://localhost:8080/introduction">Giới thiệu</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Lịch phòng</a>
-                </li>
-                <li class="nav-item request dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="showOptions()">Yêu
-                        cầu</a>
-                    <!-- Thêm phần tử chứa các lựa chọn -->
-                    <div class="dropdown-menu request-options" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Tạo yêu cầu</a>
-                        <a class="dropdown-item" href="#">Xem yêu cầu đã gửi</a>
-                        <a class="dropdown-item" href="#">Xử lý yêu cầu</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showPersonalInfoModal()">Thông tin cá nhân</a>
-                </li>
-            </ul>
+        <div class="nav-left">
+            <a class="navbar-brand" href="http://localhost:8080/introduction">Internal Web 💀</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="http://localhost:8080/introduction">Giới thiệu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Lịch phòng</a>
+                    </li>
+                    <li class="nav-item request dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            onclick="showOptions()">Yêu cầu</a>
+                        <div class="dropdown-menu request-options" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Tạo yêu cầu</a>
+                            <a class="dropdown-item" href="#">Xem yêu cầu đã gửi</a>
+                            <a class="dropdown-item" href="#">Xử lý yêu cầu</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPersonalInfoModal()">Thông tin cá nhân</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="nav-right">
+            <a href="/logout" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
         </div>
     </nav>
 
@@ -147,17 +153,19 @@
                         </div>
                         <div class="form-group">
                             <label for="position">Chức vụ:</label>
-                            <input type="text" class="form-control" id="position" th:value="${loggedInUser.position}">
+                            <input type="text" class="form-control" id="position" th:value="${loggedInUser.position}"
+                                disabled>
                         </div>
                         <div class="form-group">
                             <label for="department">Phòng ban:</label>
                             <input type="text" class="form-control" id="department"
-                                th:value="${loggedInUser.department}">
+                                th:value="${loggedInUser.department}" disabled>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="confirmUpdatePersonalInfo()" data-dismiss="modal">Lưu thay đổi</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmUpdatePersonalInfo()"
+                        data-dismiss="modal">Lưu thay đổi</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                 </div>
             </div>
@@ -306,45 +314,45 @@
             var requestOptions = document.querySelector('.request-options');
             requestOptions.classList.toggle('show-options');
         }
-            function showPersonalInfoModal() {
-        $('#personalInfoModal').modal('show');
-    }
-    
-        function confirmUpdatePersonalInfo() {
-        if (confirm("Bạn có chắc chắn muốn lưu thay đổi không?")) {
-            updatePersonalInfo();
+        function showPersonalInfoModal() {
+            $('#personalInfoModal').modal('show');
         }
-    }
 
-     function updatePersonalInfo() {
-        const userId = 1;
-        const fullName = document.getElementById('fullName').value;
-        const phone = document.getElementById('phone').value;
-        const email = document.getElementById('email').value;
-        const position = document.getElementById('position').value;
-        const department = document.getElementById('department').value;
-
-        const updatedUser = {
-            fullName: fullName,
-            phone: phone,
-            email: email,
-            position: position,
-            department: department,
-        };
-
-        $.ajax({
-            url: `/api/users/${userId}`,
-            method: 'PATCH',
-            contentType: 'application/json',
-            data: JSON.stringify(updatedUser),
-            success: function(response) {
-                alert('Thông tin cá nhân đã được cập nhật thành công.');
-            },
-            error: function(xhr) {
-                alert('Đã có lỗi xảy ra: ' + xhr.responseText);
+        function confirmUpdatePersonalInfo() {
+            if (confirm("Bạn có chắc chắn muốn lưu thay đổi không?")) {
+                updatePersonalInfo();
             }
-        });
-    }
+        }
+
+        function updatePersonalInfo() {
+            const userId = 1;
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const position = document.getElementById('position').value;
+            const department = document.getElementById('department').value;
+
+            const updatedUser = {
+                fullName: fullName,
+                phone: phone,
+                email: email,
+                position: position,
+                department: department,
+            };
+
+            $.ajax({
+                url: `/api/users/${userId}`,
+                method: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedUser),
+                success: function (response) {
+                    alert('Thông tin cá nhân đã được cập nhật thành công.');
+                },
+                error: function (xhr) {
+                    alert('Đã có lỗi xảy ra: ' + xhr.responseText);
+                }
+            });
+        }
     </script>
 </body>
 
