@@ -1,0 +1,100 @@
+
+CREATE TABLE Users (
+    UserID NUMBER PRIMARY KEY,
+    Username VARCHAR2(50),
+    Password VARCHAR2(50),
+    FullName VARCHAR2(100),
+    Phone VARCHAR2(20),
+    Email VARCHAR2(100),
+    Position VARCHAR2(100),
+    Department VARCHAR2(100),
+    Role VARCHAR2(50)
+);
+
+CREATE TABLE Internal_News (
+    NewsID NUMBER PRIMARY KEY,
+    Title VARCHAR2(200),
+    Content CLOB,
+    Author VARCHAR2(100),
+    Date_Posted TIMESTAMP,
+    UserID NUMBER REFERENCES Users(UserID),
+);
+
+CREATE TABLE Requests (
+    RequestID NUMBER PRIMARY KEY,
+    UserID NUMBER REFERENCES Users(UserID),
+    Title VARCHAR2(200),
+    RequestType VARCHAR2(100),
+    Status VARCHAR2(50),
+    DateSubmitted DATE,
+    ProcessedBy VARCHAR2(100),
+    Comments VARCHAR2(4000)
+);
+
+CREATE TABLE Request_Transfers (
+    TransferID NUMBER PRIMARY KEY,
+    RequestID NUMBER REFERENCES Requests(RequestID),
+    TransferredBy VARCHAR2(100),
+    ReceivedBy VARCHAR2(100),
+    TransferDate DATE,
+    Notes VARCHAR2(4000)
+);
+
+CREATE TABLE Result (
+    ResultID NUMBER PRIMARY KEY,
+    RequestID NUMBER REFERENCES Requests(RequestID),
+    Sender VARCHAR2(100),
+    Content CLOB,
+    SentDate DATE,
+    Notes VARCHAR2(4000)
+);
+
+
+ALTER TABLE Requests
+ADD CONSTRAINT FK_Requests_Users
+FOREIGN KEY (UserID)
+REFERENCES Users(UserID);
+
+
+ALTER TABLE Request_Transfers
+ADD CONSTRAINT FK_Request_Transfers_Requests
+FOREIGN KEY (RequestID)
+REFERENCES Requests(RequestID);
+
+ALTER TABLE Result
+ADD CONSTRAINT FK_Result_Requests
+FOREIGN KEY (RequestID)
+REFERENCES Requests(RequestID);
+
+CREATE OR REPLACE TRIGGER generate_user_credentials
+BEFORE INSERT ON Users
+FOR EACH ROW
+DECLARE
+    last_user_id NUMBER;
+BEGIN
+    SELECT MAX(UserID) INTO last_user_id FROM Users;
+    
+    :NEW.UserID := COALESCE(last_user_id, 0) + 1;
+    :NEW.Username := 'username' || :NEW.UserID;
+    :NEW.Password := 'password' || :NEW.UserID;
+END;
+/
+
+CREATE OR REPLACE TRIGGER Internal_News_BI
+BEFORE INSERT ON Internal_News
+FOR EACH ROW
+DECLARE
+    last_news_id NUMBER;
+BEGIN
+    SELECT MAX(NewsID) INTO last_news_id FROM Internal_News;
+    
+    :NEW.NewsID := COALESCE(last_news_id, 0) + 1;
+    :NEW.Date_Posted := SYSTIMESTAMP;
+END;
+/
+
+
+---------------------------------------------------------------------------------------------------
+
+
+
