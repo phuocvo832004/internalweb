@@ -124,6 +124,8 @@
                             <label for="addContent">Nội dung</label>
                             <textarea class="form-control" id="addContent" rows="3"></textarea>
                         </div>
+						<input type="hidden"class="form-control" id="loggedInUserId" th:value="${loggedInUser.userId}">
+						<input type="hidden" class="form-control" id="loggedInUserName" th:value="${loggedInUser.fullName}">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -160,55 +162,79 @@
                 card.innerHTML = `
             <div class="card">
                 <div class="card-header" style="background-color: #cc6600; color: white;">
-                    <input type="checkbox" class="form-check-input" id="checkNotification${notification.notificationId}">
+                    <input type="checkbox" class="form-check-input" id="checkNotification${notification.newsId}">
                     ${notification.title}
                 </div>
                 <div class="card-body">
                     <p class="card-text">${notification.content}</p>
-                    <button class="btn btn-secondary" onclick="showEditModal(${notification.notificationId}, '${notification.title}', '${notification.content}')">Chỉnh sửa</button>
+                    <button class="btn btn-secondary" onclick="showEditModal(${notification.newsId}, '${notification.title}', '${notification.content}')">Chỉnh sửa</button>
                 </div>
             </div>
         `;
                 notificationList.appendChild(card);
             });
         }
+		function fetchNotifications(page = 1, size = 9) {
+		    fetch(`/api/internal-news?page=${page}&size=${size}`)
+		        .then(response => response.json())
+		        .then(data => {
+		            const notificationList = document.getElementById('notificationList');
+		            notificationList.innerHTML = '';
+		            data.content.forEach(notification => {
+		                const card = document.createElement('div');
+		                card.className = 'col-md-3';
 
-        function fetchNotifications() {
-            fetch('/api/internal-news')
-                .then(response => response.json())
-                .then(data => {
-                    const notificationList = document.getElementById('notificationList');
-                    notificationList.innerHTML = '';
-                    data.forEach(notification => {
-                        const card = document.createElement('div');
-                        card.className = 'col-md-3';
-                        card.innerHTML = `
-                        <div class="card">
-                            <div class="card-header" style="background-color: #cc6600; color: white;">
-                                <input type="checkbox" class="form-check-input" id="checkNotification${notification.notificationId}">
-                                ${notification.title}
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">${notification.content}</p>
-                                <button class="btn btn-secondary" onclick="showEditModal(${notification.notificationId}, '${notification.title}', '${notification.content}')">Chỉnh sửa</button>
-                            </div>
-                        </div>
-                    `;
-                        notificationList.appendChild(card);
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-        }
+		                const truncatedContent = truncateContent(notification.content, 100); // Cắt ngắn nội dung
 
-        function showEditModal(id, title, content) {
-            document.getElementById('editId').value = id;
-            document.getElementById('editTitle').value = title;
-            document.getElementById('editContent').value = content;
-            $('#editModal').modal('show');
-        }
+		                card.innerHTML = `
+		                    <div class="card">
+		                        <div class="card-header" style="background-color: #cc6600; color: white;">
+		                            <input type="checkbox" class="form-check-input" id="checkNotification${notification.newsId}">
+		                            ${notification.title}
+		                        </div>
+		                        <div class="card-body">
+		                            <p class="card-text" id="content${notification.newsId}">${truncatedContent}</p>
+		                            ${notification.content.length > 100 ? `<button class="btn btn-link" id="toggleButton${notification.newsId}" onclick="toggleContent(${notification.newsId})" data-full-content="${encodeURIComponent(notification.content)}">Xem thêm</button>` : ''}
+		                            <button class="btn btn-secondary" onclick="showEditModal(${notification.newsId}, '${encodeURIComponent(notification.title)}', '${encodeURIComponent(notification.content)}')">Chỉnh sửa</button>
+		                        </div>
+		                    </div>
+		                `;
+		                notificationList.appendChild(card);
+		            });
+		        })
+		        .catch(error => console.error('Error:', error));
+		}
+
+		function truncateContent(content, maxLength) {
+		    return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+		}
+
+		function toggleContent(id) {
+		    const contentElement = document.getElementById(`content${id}`);
+		    const buttonElement = document.getElementById(`toggleButton${id}`);
+		    const fullContent = decodeURIComponent(buttonElement.getAttribute('data-full-content'));
+
+		    if (buttonElement.innerHTML === 'Xem thêm') {
+		        contentElement.innerHTML = fullContent;
+		        buttonElement.innerHTML = 'Thu gọn';
+		    } else {
+		        contentElement.innerHTML = truncateContent(fullContent, 100);
+		        buttonElement.innerHTML = 'Xem thêm';
+		    }
+		}
+
+		function showEditModal(id, title, content) {
+		    document.getElementById('editId').value = id;
+		    document.getElementById('editTitle').value = decodeURIComponent(title);
+		    document.getElementById('editContent').value = decodeURIComponent(content);
+		    $('#editModal').modal('show');
+		}
+
+
+
 
         function saveChanges() {
-            const id = parseInt(document.getElementById('editId').value, 10);
+            const id = parseInt(document.getElementById('editId').value.trim());
             const title = document.getElementById('editTitle').value;
             const content = document.getElementById('editContent').value;
             fetch(`/api/internal-news/${id}`, {
@@ -229,21 +255,26 @@
             $('#addModal').modal('show');
         }
 
-        function addNotification() {
-            const title = document.getElementById('addTitle').value;
-            const content = document.getElementById('addContent').value;
-            fetch('/api/internal-news/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({title, content}),
-            })
-                .then(data => {
-                    $('#addModal').modal('hide');
-                    fetchNotifications();
-                });
-        }
+		function addNotification() {
+		    const title = document.getElementById('addTitle').value;
+		    const content = document.getElementById('addContent').value;
+		    const userId = parseInt(document.getElementById('loggedInUserId').value.trim());
+		    const author = document.getElementById('loggedInUserName').value;
+			
+		    fetch('/api/internal-news/create', {
+		        method: 'POST',
+		        headers: {
+		            'Content-Type': 'application/json',
+		        },
+		        body: JSON.stringify({ title, content, author, userId }),
+		    })
+		    .then(data => {
+		        $('#addModal').modal('hide');
+		        fetchNotifications();
+		    })
+		    .catch(error => console.error('Error:', error));
+		}
+
 
         function deleteSelected() {
             const selectedIds = []; // Mảng chứa các ID của thông báo được chọn
@@ -298,20 +329,21 @@
             // Tạo và trả về element div card thông báo
         }
 
-        function createPaginationLinks(totalPages) {
-            const pagination = document.getElementById("pagination");
-            pagination.innerHTML = "";
+		function createPaginationLinks(totalPages) {
+		    const pagination = document.getElementById("pagination");
+		    pagination.innerHTML = ""; 
 
-            for (let i = 1; i <= totalPages; i++) {
-                const link = document.createElement("a");
-                link.href = "#";
-                link.textContent = i;
-                link.onclick = () => {
-                    displayNotifications(i);
-                };
-                pagination.appendChild(link);
-            }
-        }
+		    for (let i = 1; i <= totalPages; i++) {
+		        const link = document.createElement("a");
+		        link.href = "#";
+		        link.textContent = i;
+		        link.onclick = () => {
+		            displayNotifications(i); 
+		        };
+		        pagination.appendChild(link);
+		    }
+		}
+
 
         displayNotifications(1);
 

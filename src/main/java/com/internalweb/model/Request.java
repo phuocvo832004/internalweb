@@ -9,26 +9,26 @@ public class Request {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "RequestID")
+    @Column(name = "Request_ID")
     private Long requestId;
     
     @ManyToOne
-    @JoinColumn(name = "UserID")
+    @JoinColumn(name = "User_ID")
     private User user;
     
     @Column(name = "Title")
     private String title;
     
-    @Column(name = "RequestType")
+    @Column(name = "Request_Type")
     private String requestType;
     
     @Column(name = "Status")
     private String status;
     
-    @Column(name = "DateSubmitted")
+    @Column(name = "Date_Submitted")
     private Date dateSubmitted;
     
-    @Column(name = "ProcessedBy")
+    @Column(name = "Processed_By")
     private String processedBy;
     
     @Column(name = "Comments")

@@ -9,7 +9,7 @@ public class InternalNews {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "NewsID")
+    @Column(name = "News_ID")
     private Long newsId;
     
     @Column(name = "Title")
@@ -25,7 +25,7 @@ public class InternalNews {
     @Column(name = "Date_Posted")
     private Date datePosted;
     
-    @Column(name = "UserId")
+    @Column(name = "User_ID")
     private Long userId;
 
 	public InternalNews() {

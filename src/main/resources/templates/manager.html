@@ -34,7 +34,7 @@
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                             onclick="showOptions()">Yêu cầu</a>
                         <div class="dropdown-menu request-options" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Tạo yêu cầu</a>
+                            <a class="dropdown-item" href="#" onclick="showCreateModal()">Tạo yêu cầu</a>
                             <a class="dropdown-item" href="#">Xem yêu cầu đã gửi</a>
                             <a class="dropdown-item" href="#">Xử lý yêu cầu</a>
                         </div>
@@ -146,6 +146,7 @@
                             onchange="previewAvatar(event)">
                     </div>
                     <form id="personalInfoForm">
+						<input type="hidden" id="loggedInUserId" th:value="${loggedInUser.userId}">
                         <div class="form-group">
                             <label for="fullName">Họ và tên: </label>
                             <input type="text" class="form-control" id="fullName" th:value="${loggedInUser.fullName}">
@@ -178,6 +179,43 @@
             </div>
         </div>
     </div>
+	
+	<!-- Modal for creating request -->
+	<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel"
+	    aria-hidden="true">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title" id="createModalLabel">Tạo yêu cầu</h5>
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                    <span aria-hidden="true">&times;</span>
+	                </button>
+	            </div>
+	            <div class="modal-body">
+	                <!-- Create form -->
+	                <form id="createForm" th:action="@{/create}" method="post">
+	                    <div class="form-group">
+	                        <label for="title">Tiêu đề</label>
+	                        <input type="text" class="form-control" id="title" name="title">
+	                    </div>
+	                    <div class="form-group">
+	                        <label for="content">Nội dung</label>
+	                        <textarea class="form-control" id="content" name="content" rows="3"></textarea>
+	                    </div>
+	                    <div class="form-group">
+	                        <label for="email">Email</label>
+	                        <input type="email" class="form-control" id="email" name="email">
+	                    </div>
+	                </form>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+	                <button type="submit" form="createForm" class="btn btn-primary">Gửi</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -329,7 +367,8 @@
         }
 
         function updatePersonalInfo() {
-            const userId = 1;
+			
+			const userId = parseInt(document.getElementById('loggedInUserId').value.trim());
             const fullName = document.getElementById('fullName').value;
             const phone = document.getElementById('phone').value;
             const email = document.getElementById('email').value;
@@ -400,6 +439,10 @@
             }
         });
 
+		    function showCreateModal() {
+		        $('#createModal').modal('show'); 
+		    }
+		
     </script>
 </body>
 

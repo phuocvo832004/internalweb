@@ -9,11 +9,11 @@ public class Result {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ResultID")
+    @Column(name = "Result_ID")
     private Long resultId;
     
     @ManyToOne
-    @JoinColumn(name = "RequestID")
+    @JoinColumn(name = "Request_ID")
     private Request request;
     
     @Column(name = "Sender")
@@ -23,7 +23,7 @@ public class Result {
     @Lob
     private String content;
     
-    @Column(name = "SentDate")
+    @Column(name = "Sent_Date")
     private Date sentDate;
     
     @Column(name = "Notes")

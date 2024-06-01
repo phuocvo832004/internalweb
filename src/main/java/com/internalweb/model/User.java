@@ -8,7 +8,7 @@ public class User {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "UserID")
+    @Column(name = "User_ID")
     private Long userId;
     
     @Column(name = "Username")

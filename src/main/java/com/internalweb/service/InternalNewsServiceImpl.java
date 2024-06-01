@@ -25,7 +25,7 @@ public class InternalNewsServiceImpl implements InternalNewsService {
 
     @Override
     public List<InternalNews> findByTitleContaining(String keyword) {
-        return internalNewsRepository.findByTitleContaining(keyword);
+        return internalNewsRepository.findByTitleContainingIgnoreCase(keyword);
     }
 
     @Override
@@ -60,5 +60,6 @@ public class InternalNewsServiceImpl implements InternalNewsService {
     public List<InternalNews> findByUserId(Long id){
     	return internalNewsRepository.findByUserId(id);
     }
+    
     
 }

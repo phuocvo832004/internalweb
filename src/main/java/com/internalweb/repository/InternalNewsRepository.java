@@ -9,12 +9,11 @@ import com.internalweb.model.InternalNews;
 
 public interface InternalNewsRepository extends JpaRepository<InternalNews, Long> {
 	
-	List<InternalNews> findByTitleContaining(String keyword);
+	List<InternalNews> findByTitleContainingIgnoreCase(String keyword);
 	
 	Page<InternalNews> findAll(Pageable pageable);
 	
 	List<InternalNews> findByUserId(Long userId);
 	
-
 }
 

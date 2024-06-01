@@ -9,20 +9,20 @@ public class RequestTransfer {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TransferID")
+    @Column(name = "Transfer_ID")
     private Long transferId;
     
     @ManyToOne
-    @JoinColumn(name = "RequestID")
+    @JoinColumn(name = "Request_ID")
     private Request request;
     
-    @Column(name = "TransferredBy")
+    @Column(name = "Transferred_By")
     private String transferredBy;
     
-    @Column(name = "ReceivedBy")
+    @Column(name = "Received_By")
     private String receivedBy;
     
-    @Column(name = "TransferDate")
+    @Column(name = "Transfer_Date")
     private Date transferDate;
     
     @Column(name = "Notes")
