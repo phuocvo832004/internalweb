@@ -46,4 +46,9 @@ public class RequestTransferServiceImpl implements RequestTransferService {
     public void deleteById(Long id) {
         requestTransferRepository.deleteById(id);
     }
+    
+    @Override
+    public String findByRequestId(Long requestId) {
+    	return requestTransferRepository.findByRequestId(requestId);
+    }
 }

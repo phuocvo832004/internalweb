@@ -12,15 +12,11 @@ public class Request {
     @Column(name = "Request_ID")
     private Long requestId;
     
-    @ManyToOne
-    @JoinColumn(name = "User_ID")
-    private User user;
+    @Column(name = "User_ID")
+    private Long userId;
     
     @Column(name = "Title")
     private String title;
-    
-    @Column(name = "Request_Type")
-    private String requestType;
     
     @Column(name = "Status")
     private String status;
@@ -39,18 +35,21 @@ public class Request {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Request(Long requestId, User user, String title, String requestType, String status, Date dateSubmitted,
-			String processedBy, String comments) {
+	
+
+	public Request(Long requestId, Long userId, String title, String status, Date dateSubmitted, String processedBy,
+			String comments) {
 		super();
 		this.requestId = requestId;
-		this.user = user;
+		this.userId = userId;
 		this.title = title;
-		this.requestType = requestType;
 		this.status = status;
 		this.dateSubmitted = dateSubmitted;
 		this.processedBy = processedBy;
 		this.comments = comments;
 	}
+
+
 
 	public Long getRequestId() {
 		return requestId;
@@ -60,13 +59,19 @@ public class Request {
 		this.requestId = requestId;
 	}
 
-	public User getUser() {
-		return user;
+	
+
+	public Long getUserId() {
+		return userId;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
+
+
 
 	public String getTitle() {
 		return title;
@@ -74,14 +79,6 @@ public class Request {
 
 	public void setTitle(String title) {
 		this.title = title;
-	}
-
-	public String getRequestType() {
-		return requestType;
-	}
-
-	public void setRequestType(String requestType) {
-		this.requestType = requestType;
 	}
 
 	public String getStatus() {

@@ -11,5 +11,6 @@ public interface UserService {
     void deleteById(Long id);
     List<User> findAllByRole(String role);
     List<User> searchStaff(String query);
+    List<User> searchReceiver(String query);
 }
 

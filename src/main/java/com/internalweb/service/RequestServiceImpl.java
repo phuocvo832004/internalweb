@@ -23,12 +23,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<Request> findByUserId(Long userId) {
-        return requestRepository.findByUserUserId(userId);
-    }
-
-    @Override
-    public List<Request> findByRequestType(String requestType) {
-        return requestRepository.findByRequestType(requestType);
+        return requestRepository.findByUserId(userId);
     }
 
     @Override
@@ -50,6 +45,11 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public void deleteById(Long id) {
         requestRepository.deleteById(id);
+    }
+    
+    @Override
+    public List<Request> getRequestByEmailAndStatus(String email, String status){
+    	return requestRepository.findByProcessedByAndStatus(email, status);
     }
 }
 

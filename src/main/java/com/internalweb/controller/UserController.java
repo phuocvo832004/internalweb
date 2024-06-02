@@ -1,8 +1,13 @@
 package com.internalweb.controller;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +38,11 @@ public class UserController {
  @GetMapping("/users/staff/search")
  public List<User> searchStaff(@RequestParam String query) {
      return userService.searchStaff(query);
+ }
+ 
+ @GetMapping("/users/receiver/search")
+ public List<User> searchReceiver(@RequestParam String query) {
+     return userService.searchReceiver(query);
  }
  
  @GetMapping("/users/staff")
@@ -124,39 +134,40 @@ public class UserController {
  }
  
  
- @PostMapping("/users/update-avatar")
- public ResponseEntity<String> updateAvatar(@RequestParam("avatar") MultipartFile avatarFile, HttpSession session) {
-     User loggedInUser = (User) session.getAttribute("loggedInUser");
-     if (loggedInUser == null) {
-         return new ResponseEntity<>("Người dùng không được xác thực", HttpStatus.UNAUTHORIZED);
-     }
 
-     try {
+@PostMapping("/users/update-avatar")
+public ResponseEntity<String> updateAvatar(@RequestParam("avatar") MultipartFile avatarFile, HttpSession session) {
+    User loggedInUser = (User) session.getAttribute("loggedInUser");
+    if (loggedInUser == null) {
+        return new ResponseEntity<>("Người dùng không được xác thực", HttpStatus.UNAUTHORIZED);
+    }
 
-         String avatarPath = saveAvatarFile(avatarFile);
-         loggedInUser.setAvatar(avatarPath);
+    try {
+        String avatarPath = saveAvatarFile(avatarFile);
+        loggedInUser.setAvatar(avatarPath);
 
-         userService.save(loggedInUser);
-         session.setAttribute("loggedInUser", loggedInUser);
+        userService.save(loggedInUser);
+        session.setAttribute("loggedInUser", loggedInUser);
 
-         return new ResponseEntity<>("Avatar đã được cập nhật thành công", HttpStatus.OK);
-     } catch (IOException e) {
-         return new ResponseEntity<>("Lỗi khi lưu tệp avatar", HttpStatus.INTERNAL_SERVER_ERROR);
-     }
- }
+        return new ResponseEntity<>("Avatar đã được cập nhật thành công", HttpStatus.OK);
+    } catch (IOException e) {
+        return new ResponseEntity<>("Lỗi khi lưu tệp avatar", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
 
- private String saveAvatarFile(MultipartFile file) throws IOException {
+private String saveAvatarFile(MultipartFile file) throws IOException {
+    String uploadsDir = "./src/main/resources/static/images/";
+    String originalFilename = file.getOriginalFilename();
+    String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+    String fileName = UUID.randomUUID().toString() + extension;
+    String filePath = uploadsDir + fileName;
 
-     String uploadsDir = "./images/";
-     String originalFilename = file.getOriginalFilename();
-     String filePath = uploadsDir + originalFilename;
+    Path path = Paths.get(filePath);
+    Files.createDirectories(path.getParent());
+    Files.write(path, file.getBytes());
 
-     java.nio.file.Path path = java.nio.file.Paths.get(filePath);
-     java.nio.file.Files.createDirectories(path.getParent());
-     java.nio.file.Files.write(path, file.getBytes());
-
-     return filePath;
- }
+    return "/images/" + fileName;
+}
  
 
  

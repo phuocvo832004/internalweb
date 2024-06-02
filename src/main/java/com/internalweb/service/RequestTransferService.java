@@ -12,5 +12,6 @@ public interface RequestTransferService {
     RequestTransfer findById(Long id);
     void save(RequestTransfer requestTransfer);
     void deleteById(Long id);
+	String findByRequestId(Long requestId);
 }
 

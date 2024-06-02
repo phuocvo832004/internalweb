@@ -50,5 +50,11 @@ public class UserServiceImpl implements UserService {
     public List<User> searchStaff(String query) {
         return userRepository.findByFullNameContainingIgnoreCaseOrDepartmentContainingIgnoreCaseOrPositionContainingIgnoreCase(query, query, query);
     }
+    
+    @Override
+    public List<User> searchReceiver(String query){
+    	return userRepository.findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query);
+    }
+
 }
 

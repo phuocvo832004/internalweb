@@ -9,8 +9,8 @@ import com.internalweb.model.Request;
 public interface RequestRepository extends JpaRepository<Request, Long> {
 	
 	List<Request> findByStatus(String status);
-    List<Request> findByUserUserId(Long userId);
-    List<Request> findByRequestType(String requestType);
+    List<Request> findByUserId(Long userId);
+    List<Request> findByProcessedByAndStatus(String email, String status);
 
 }
 

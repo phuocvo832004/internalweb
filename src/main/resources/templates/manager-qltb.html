@@ -307,6 +307,26 @@
 
     </script>
     <script>
+		
+		function renderPagination() {
+		    var paginationHtml = '';
+
+		    paginationHtml += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + '">';
+		    paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + (currentPage - 1) + ')">Previous</a>';
+		    paginationHtml += '</li>';
+
+		    for (var i = 1; i <= totalPages; i++) {
+		        paginationHtml += '<li class="page-item ' + (i === currentPage ? 'active' : '') + '">';
+		        paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + i + ')">' + i + '</a>';
+		        paginationHtml += '</li>';
+		    }
+
+		    paginationHtml += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + '">';
+		    paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + (currentPage + 1) + ')">Next</a>';
+		    paginationHtml += '</li>';
+
+		    $('.pagination').html(paginationHtml);
+		}
         const notifications = [];
 
         const itemsPerPage = 16;
