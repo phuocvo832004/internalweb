@@ -16,7 +16,7 @@ END;
 /
 
 CREATE TABLE Users (
-    UserID NUMBER PRIMARY KEY,
+    User_ID NUMBER PRIMARY KEY,
     Username VARCHAR2(50),
     Password VARCHAR2(50),
     Full_Name VARCHAR2(100),
@@ -24,20 +24,22 @@ CREATE TABLE Users (
     Email VARCHAR2(100),
     Position VARCHAR2(100),
     Department VARCHAR2(100),
-    Role VARCHAR2(50)
+    Role VARCHAR2(50) CHECK (Role IN ('Staff', 'Manager')),
+    Avatar VARCHAR2(255)
 );
 
 CREATE TABLE Internal_News (
-    NewsID NUMBER PRIMARY KEY,
+    News_ID NUMBER PRIMARY KEY,
     Title VARCHAR2(200),
     Content CLOB,
     Author VARCHAR2(100),
-    Date_Posted TIMESTAMP
+    Date_Posted TIMESTAMP,
+    User_ID NUMBER REFERENCES Users(User_ID)
 );
 
 CREATE TABLE Requests (
-    RequestID NUMBER PRIMARY KEY,
-    UserID NUMBER REFERENCES Users(UserID),
+    Request_ID NUMBER PRIMARY KEY,
+    User_ID NUMBER REFERENCES Users(User_ID),
     Title VARCHAR2(200),
     Request_Type VARCHAR2(100),
     Status VARCHAR2(50),
@@ -47,8 +49,8 @@ CREATE TABLE Requests (
 );
 
 CREATE TABLE Request_Transfers (
-    TransferID NUMBER PRIMARY KEY,
-    RequestID NUMBER REFERENCES Requests(RequestID),
+    Transfer_ID NUMBER PRIMARY KEY,
+    Request_ID NUMBER REFERENCES Requests(Request_ID),
     Transferred_By VARCHAR2(100),
     Received_By VARCHAR2(100),
     Transfer_Date DATE,
@@ -56,8 +58,8 @@ CREATE TABLE Request_Transfers (
 );
 
 CREATE TABLE Result (
-    ResultID NUMBER PRIMARY KEY,
-    RequestID NUMBER REFERENCES Requests(RequestID),
+    Result_ID NUMBER PRIMARY KEY,
+    Request_ID NUMBER REFERENCES Requests(Request_ID),
     Sender VARCHAR2(100),
     Content CLOB,
     Sent_Date DATE,
@@ -104,7 +106,7 @@ CREATE OR REPLACE TRIGGER trg_users
 BEFORE INSERT ON Users
 FOR EACH ROW
 BEGIN
-    :NEW.UserID := seq_users.NEXTVAL;
+    :NEW.User_ID := seq_users.NEXTVAL;
 END;
 /
 
@@ -113,7 +115,7 @@ CREATE OR REPLACE TRIGGER trg_internal_news
 BEFORE INSERT ON Internal_News
 FOR EACH ROW
 BEGIN
-    :NEW.NewsID := seq_internal_news.NEXTVAL;
+    :NEW.News_ID := seq_internal_news.NEXTVAL;
 END;
 /
 
@@ -122,7 +124,7 @@ CREATE OR REPLACE TRIGGER trg_requests
 BEFORE INSERT ON Requests
 FOR EACH ROW
 BEGIN
-    :NEW.RequestID := seq_requests.NEXTVAL;
+    :NEW.Request_ID := seq_requests.NEXTVAL;
 END;
 /
 
@@ -131,7 +133,7 @@ CREATE OR REPLACE TRIGGER trg_request_transfers
 BEFORE INSERT ON Request_Transfers
 FOR EACH ROW
 BEGIN
-    :NEW.TransferID := seq_request_transfers.NEXTVAL;
+    :NEW.Transfer_ID := seq_request_transfers.NEXTVAL;
 END;
 /
 
@@ -140,17 +142,53 @@ CREATE OR REPLACE TRIGGER trg_result
 BEFORE INSERT ON Result
 FOR EACH ROW
 BEGIN
-    :NEW.ResultID := seq_result.NEXTVAL;
+    :NEW.Result_ID := seq_result.NEXTVAL;
+END;
+/
+create or replace NONEDITIONABLE TRIGGER create_internal_news_trigger
+BEFORE INSERT ON Internal_News
+FOR EACH ROW
+BEGIN
+    :NEW.Date_Posted := CURRENT_TIMESTAMP;
 END;
 /
 
-ALTER TABLE Users
-ADD CONSTRAINT chk_role CHECK (Role IN ('Staff', 'Admin'));
+create or replace NONEDITIONABLE TRIGGER create_request_trigger
+BEFORE INSERT ON Requests
+FOR EACH ROW
+BEGIN
+    :NEW.DATE_SUBMITTED := CURRENT_TIMESTAMP;
+END;
+/
 
+create or replace NONEDITIONABLE TRIGGER create_user_trigger
+BEFORE INSERT ON Users
+FOR EACH ROW
+DECLARE
+    v_username VARCHAR2(50);
+    v_password VARCHAR2(50);
+BEGIN
+    v_username := 'username' || SEQ_USERS.NEXTVAL;
+
+    v_password := 'password' || SEQ_USERS.NEXTVAL;
+
+    :NEW.Username := v_username;
+    :NEW.Password := v_password;
+    :NEW.Role := 'Staff';
+END;
+/
+
+create or replace NONEDITIONABLE TRIGGER create_request_transfer_trigger
+BEFORE INSERT ON Request_Transfers
+FOR EACH ROW
+BEGIN
+    :NEW.Transfer_date := CURRENT_TIMESTAMP;
+END;
+/
 
 -- Insert fake data into Users
 INSERT INTO Users (Username, Password, Full_Name, Phone, Email, Position, Department, Role) VALUES
-('user1', 'password1', 'Nguyen Van A', '0912345678', 'nguyenvana@example.com', 'Manager', 'Sales', 'Admin');
+('user1', 'password1', 'Nguyen Van A', '0912345678', 'nguyenvana@example.com', 'Manager', 'Sales', 'Manager');
 
 INSERT INTO Users (Username, Password, Full_Name, Phone, Email, Position, Department, Role) VALUES
 ('user2', 'password2', 'Tran Thi B', '0912345679', 'tranthib@example.com', 'Assistant', 'Marketing', 'Staff');
@@ -181,53 +219,54 @@ INSERT INTO Internal_News (Title, Content, Author, Date_Posted) VALUES
 ('Consulting Success Stories', 'Content of consulting success stories...', 'Hoang Van E', SYSTIMESTAMP);
 
 -- Insert fake data into Requests
-INSERT INTO Requests (UserID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
+INSERT INTO Requests (User_ID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
 (1, 'Need new laptop', 'Equipment', 'Pending', SYSDATE, 'Tran Thi B', 'Urgent need for a new laptop for work.');
 
-INSERT INTO Requests (UserID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
+INSERT INTO Requests (User_ID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
 (2, 'Marketing materials', 'Marketing', 'Approved', SYSDATE - 5, 'Nguyen Van A', 'Request for new marketing materials for Q3.');
 
-INSERT INTO Requests (UserID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
+INSERT INTO Requests (User_ID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
 (3, 'Development server access', 'IT', 'Rejected', SYSDATE - 10, 'Le Van C', 'Need access to the new development server.');
 
-INSERT INTO Requests (UserID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
+INSERT INTO Requests (User_ID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
 (4, 'Support tool license', 'Software', 'Pending', SYSDATE - 2, 'Pham Thi D', 'Request for new license for support tool.');
 
-INSERT INTO Requests (UserID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
+INSERT INTO Requests (User_ID, Title, Request_Type, Status, Date_Submitted, Processed_By, Comments) VALUES
 (5, 'Consulting workshop', 'Training', 'Approved', SYSDATE - 7, 'Hoang Van E', 'Request to attend consulting workshop in HCM.');
 
 -- Insert fake data into Request_Transfers
-INSERT INTO Request_Transfers (RequestID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
+INSERT INTO Request_Transfers (Request_ID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
 (1, 'Nguyen Van A', 'Tran Thi B', SYSDATE - 1, 'Transferred for approval.');
 
-INSERT INTO Request_Transfers (RequestID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
+INSERT INTO Request_Transfers (Request_ID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
 (2, 'Tran Thi B', 'Nguyen Van A', SYSDATE - 4, 'Approved and processed.');
 
-INSERT INTO Request_Transfers (RequestID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
+INSERT INTO Request_Transfers (Request_ID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
 (3, 'Le Van C', 'Nguyen Van A', SYSDATE - 9, 'Reviewed and rejected.');
 
-INSERT INTO Request_Transfers (RequestID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
+INSERT INTO Request_Transfers (Request_ID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
 (4, 'Pham Thi D', 'Le Van C', SYSDATE - 1, 'Transferred for technical review.');
 
-INSERT INTO Request_Transfers (RequestID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
+INSERT INTO Request_Transfers (Request_ID, Transferred_By, Received_By, Transfer_Date, Notes) VALUES
 (5, 'Hoang Van E', 'Pham Thi D', SYSDATE - 6, 'Approved and forwarded for arrangements.');
 
 -- Insert fake data into Result
-INSERT INTO Result (RequestID, Sender, Content, Sent_Date, Notes) VALUES
+INSERT INTO Result (Request_ID, Sender, Content, Sent_Date, Notes) VALUES
 (1, 'Tran Thi B', 'Approved for a new laptop.', SYSDATE, 'Please proceed with procurement.');
 
-INSERT INTO Result (RequestID, Sender, Content, Sent_Date, Notes) VALUES
+INSERT INTO Result (Request_ID, Sender, Content, Sent_Date, Notes) VALUES
 (2, 'Nguyen Van A', 'Marketing materials request approved.', SYSDATE - 4, 'Materials will be provided by end of week.');
 
-INSERT INTO Result (RequestID, Sender, Content, Sent_Date, Notes) VALUES
+INSERT INTO Result (Request_ID, Sender, Content, Sent_Date, Notes) VALUES
 (3, 'Le Van C', 'Access request rejected due to policy.', SYSDATE - 9, 'Cannot provide access at this time.');
 
-INSERT INTO Result (RequestID, Sender, Content, Sent_Date, Notes) VALUES
+INSERT INTO Result (Request_ID, Sender, Content, Sent_Date, Notes) VALUES
 (4, 'Pham Thi D', 'Support tool license request pending.', SYSDATE - 1, 'Awaiting further review.');
 
-INSERT INTO Result (RequestID, Sender, Content, Sent_Date, Notes) VALUES
+INSERT INTO Result (Request_ID, Sender, Content, Sent_Date, Notes) VALUES
 (5, 'Hoang Van E', 'Workshop attendance approved.', SYSDATE - 6, 'Please confirm attendance with HR.');
 
+commit;
 
 ---------------------------------------------------------------------------------------------------
 
