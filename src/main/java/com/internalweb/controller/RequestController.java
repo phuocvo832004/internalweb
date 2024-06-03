@@ -30,6 +30,7 @@ public class RequestController {
 
 	@Autowired
 	private RequestService requestService;
+	@Autowired
 	private RequestTransferService requestTransferService;
 	
 	@GetMapping("/sended-request/{userId}")
@@ -43,21 +44,25 @@ public class RequestController {
 		return requestService.getRequestByEmailAndStatus(email, "Pending");
 	}
 	
-	@GetMapping("/request-transfer")
-	public List<RequestTransfer> getRequestTransfer(){
-		return requestTransferService.findAll();
-	}
-	
 	@GetMapping("/notes/{requestId}")
 	public String getNotesByRequestId(@PathVariable Long requestId) {
-		return requestTransferService.findByRequestId(requestId);
+		RequestTransfer requestTransfer = requestTransferService.findByRequestId(requestId);
+	    return requestTransfer.getNotes();
 	}
+
 	
 	@PostMapping("/create")
 	public ResponseEntity<String> postRequest(@RequestBody Request request) {
 		requestService.save(request);
         return new ResponseEntity<>("Một thông báo đã được tạo thành công!", HttpStatus.CREATED);
 
+	}
+	
+
+	@PostMapping("/transfer")
+	public ResponseEntity<String> postRequestTransfer(@RequestBody RequestTransfer requestTransfer){
+		requestTransferService.save(requestTransfer);
+		return new ResponseEntity<>("Một thông báo đã được tạo thành công!", HttpStatus.CREATED);
 	}
 	
 	@PatchMapping("/change-status/{requestId}")
@@ -68,6 +73,9 @@ public class RequestController {
 	             case "status":
 	                 req.setStatus((String) value);
 	                 break;
+	             case "processedBy":
+	            	 req.setProcessedBy((String) value);
+	            	 break;
 	         }
 	     });
 	     

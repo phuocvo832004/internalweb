@@ -31,11 +31,6 @@ public class RequestTransferServiceImpl implements RequestTransferService {
         return requestTransferRepository.findAll();
     }
 
-    @Override
-    public RequestTransfer findById(Long id) {
-        Optional<RequestTransfer> result = requestTransferRepository.findById(id);
-        return result.orElse(null);
-    }
 
     @Override
     public void save(RequestTransfer requestTransfer) {
@@ -48,7 +43,7 @@ public class RequestTransferServiceImpl implements RequestTransferService {
     }
     
     @Override
-    public String findByRequestId(Long requestId) {
-    	return requestTransferRepository.findByRequestId(requestId);
+    public RequestTransfer findByRequestId(Long requestId) {
+    	return requestTransferRepository.findByRequestRequestId(requestId);
     }
 }

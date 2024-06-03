@@ -57,6 +57,11 @@
 	        outline: none;
 	        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 	    }
+		
+		.notesInput {
+		    width: 100%;
+		    box-sizing: border-box;
+		}
 	</style>
 </head>
 
@@ -310,7 +315,7 @@
 	                    </button>
 	                </div>
 	                <div class="modal-body">
-	                    <table class="table table-bordered">
+	                    <table id="tableManageRequest" class="table table-bordered">
 	                        <thead>
 	                            <tr>
 	                                <th>ID</th>
@@ -319,6 +324,7 @@
 	                                <th>Người gửi</th>
 	                                <th>Chuyển tiếp</th>
 	                                <th>Hành động</th>
+									<th>Ghi chú</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody id="requestTableBody">
@@ -329,7 +335,7 @@
 	                        <label for="forwardEmail">Email người nhận chuyển tiếp</label>
 							<div style="display: flex; align-items: center;">
 							    <input type="email" id="forwardEmail" class="form-control" placeholder="Nhập email" style="margin-right: 10px;">
-							    <button id="forwardButton" class="btn btn-primary">Chuyển</button>
+							    <button id="forwardButton" class="btn btn-primary" onclick="transferSelectedRequests()">Chuyển</button>
 							</div>
 
 	                    </div>
@@ -392,7 +398,7 @@
 		        var title = $("#title").val();
 		        var content = $("#content").val();
 		        var emailReceiver = $("#emailReceiver").val();
-		        var userId = parseInt(document.getElementById('loggedInUserId').value.trim());
+		        const userId = parseInt(document.getElementById('loggedInUserId').value.trim());
 
 				if (!title || !content || !emailReceiver) {
 				            alert("Vui lòng điền đầy đủ thông tin.");
@@ -470,7 +476,6 @@
 		    }
 		    var userEmail = userEmailElement.value;
 
-		    // Hàm để tải danh sách yêu cầu từ server
 		    function loadRequests() {
 		        $.ajax({
 		            url: "/api/request/handle-request/" + userEmail,
@@ -479,14 +484,13 @@
 		            success: function(data) {
 		                var requestTableBody = $("#requestTableBody");
 		                requestTableBody.empty();
-		                console.log(data);
 		                data.forEach(function(request) {
 		                    var row = $("<tr>");
-		                    row.append($("<td>").text(request.requestId));
-		                    row.append($("<td>").text(request.title));
-		                    row.append($("<td>").text(request.comments));
+		                    row.append($('<td class="reqId">').text(request.requestId));
+		                    row.append($('<td class="title">').text(request.title));
+		                    row.append($('<td class="cmt">').text(request.comments));
 		                    row.append($("<td>").text(request.userId));
-		                    row.append($("<td>").append($('<input type="checkbox" class="forwardCheckbox">').val(request.requestId)));
+		                    row.append($("<td>").append($('<input type="checkbox" class="forwardCheckbox">').val(request.requestId))); 
 		                    var actionTd = $("<td style='display: flex'>");
 		                    var approveBtn = $('<button class="btn btn-success btn-sm">Approve</button>');
 		                    var rejectBtn = $('<button class="btn btn-danger btn-sm">Reject</button>');
@@ -498,6 +502,9 @@
 		                    });
 		                    actionTd.append(approveBtn).append(rejectBtn);
 		                    row.append(actionTd);
+							var notesInput = $('<input type="text" class="form-control notesInput">').val("");
+							fetchNotes(request.requestId, notesInput);
+							row.append($('<td class="note">').append(notesInput));
 		                    requestTableBody.append(row);
 		                });
 		            },
@@ -511,8 +518,27 @@
 		    $("#manageRequestsModal").on('show.bs.modal', function() {
 		        loadRequests();
 		    });
-
-		    // Hàm để xử lý approve/reject
+			
+			function handleRequest(status, requestId, row) {
+			               var notes = row.find('.notesInput').val(); // Lấy giá trị của ghi chú
+			               $.ajax({
+			                   url: "/api/request/change-status/" + requestId,
+			                   method: "PATCH",
+			                   contentType: "application/json",
+			                   data: JSON.stringify({
+			                       status: status,
+			                       notes: notes
+			                   }),
+			                   success: function (response) {
+			                       alert(response);
+			                       row.remove(); // Remove the row from the table
+			                   },
+			                   error: function (xhr, status, error) {
+			                       alert("Đã xảy ra lỗi khi " + status + " yêu cầu: " + error);
+			                   }
+			               });
+			           }
+					   
 		    function handleRequest(status, requestId, row) {
 		        $.ajax({
 		            url: "/api/request/change-status/" + requestId,
@@ -532,8 +558,21 @@
 		            }
 		        });
 		    }
+			
+			function fetchNotes(requestId, notesInput) {
+			    $.ajax({
+			        url: "/api/request/notes/" + requestId,
+			        method: "GET",
+			        success: function(data) {
+			            notesInput.val(data || ""); 
+			        },
+			        error: function(xhr, status, error) {
+			            // Bỏ qua lỗi và không làm gì cả
+			        }
+			    });
+			}
 
-		    // Tự động hoàn thành cho email
+
 		    $("#forwardEmail").autocomplete({
 		        source: function (request, response) {
 		            $.ajax({
@@ -543,7 +582,6 @@
 		                    query: request.term
 		                },
 		                success: function (data) {
-		                    console.log(data);
 		                    response(data.map(function (item) {
 		                        return {
 		                            label: item.fullName + " (" + item.email + ")",
@@ -556,6 +594,65 @@
 		        minLength: 1
 		    });
 		});
+		
+		function transferSelectedRequests() {
+		    var userEmailElement = document.getElementById('loggedInUserEmail');
+		    var receiverEmailElement = document.getElementById('forwardEmail');
+		    var userEmail = userEmailElement ? userEmailElement.value : null;
+		    var receiverEmail = receiverEmailElement ? receiverEmailElement.value : null;
+
+		    if (!receiverEmail) {
+		        alert('Hãy điền thông tin người xử lý tiếp theo!');
+		        return;
+		    }
+
+		    $('#requestTableBody tr').each(function() {
+		        var checkbox = $(this).find('input[type="checkbox"]');
+		        if (checkbox.is(':checked')) {
+		            var row = $(this); // Lưu trữ dòng hiện tại để xóa sau này
+		            const requestId = parseInt(row.find('.reqId').text());
+		            var notes = row.find('.note input').val();
+
+		            var requestData = {
+		                requestId: requestId,
+		                notes: notes,
+		                transferredBy: userEmail,
+		                receivedBy: receiverEmail
+		            };
+
+		            $.ajax({
+		                url: "/api/request/transfer",
+		                method: "POST",
+		                contentType: "application/json",
+		                data: JSON.stringify(requestData),
+		                success: function(data) {
+		                    $.ajax({
+		                        url: "/api/request/change-status/" + requestId,
+		                        method: "PATCH",
+		                        contentType: "application/json",
+		                        data: JSON.stringify({
+		                            status: "Pending",
+		                            processedBy: receiverEmail
+		                        }),
+		                        success: function(response) {
+		                            row.remove();
+		                        },
+		                        error: function(xhr, status, error) {
+		                            alert("Đã xảy ra lỗi khi " + status + " yêu cầu: " + error);
+		                        }
+		                    });
+		                },
+		                error: function(xhr, status, error) {
+		                    console.error("Đã xảy ra lỗi khi chuyển yêu cầu: " + error);
+		                }
+		            });
+					alert('Chuyển giao thành công!');
+		        }
+		    });
+		}
+
+
+
 
 
         function previewAvatar(event) {

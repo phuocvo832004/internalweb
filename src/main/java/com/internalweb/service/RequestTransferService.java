@@ -9,9 +9,8 @@ public interface RequestTransferService {
     List<RequestTransfer> findByTransferredBy(String transferredBy);
     List<RequestTransfer> findByReceivedBy(String receivedBy);
     List<RequestTransfer> findAll();
-    RequestTransfer findById(Long id);
     void save(RequestTransfer requestTransfer);
     void deleteById(Long id);
-	String findByRequestId(Long requestId);
+    RequestTransfer findByRequestId(Long requestId);
 }
 
