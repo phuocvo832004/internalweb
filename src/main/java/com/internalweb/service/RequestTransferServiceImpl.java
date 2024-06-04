@@ -44,6 +44,6 @@ public class RequestTransferServiceImpl implements RequestTransferService {
     
     @Override
     public RequestTransfer findByRequestId(Long requestId) {
-    	return requestTransferRepository.findByRequestRequestId(requestId);
+    	return requestTransferRepository.findByRequestId(requestId);
     }
 }

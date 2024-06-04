@@ -9,6 +9,6 @@ public interface RequestTransferRepository extends JpaRepository<RequestTransfer
 	
 	List<RequestTransfer> findByTransferredBy(String transferredBy);
 	List<RequestTransfer> findByReceivedBy(String receivedBy);
-	RequestTransfer findByRequestRequestId(Long requestId);
+	RequestTransfer findByRequestId(Long requestId);
 }
 

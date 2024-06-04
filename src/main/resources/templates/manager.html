@@ -539,25 +539,6 @@
 			               });
 			           }
 					   
-		    function handleRequest(status, requestId, row) {
-		        $.ajax({
-		            url: "/api/request/change-status/" + requestId,
-		            method: "PATCH",
-		            contentType: "application/json",
-		            data: JSON.stringify({
-		                status: status
-		            }),
-		            success: function(response) {
-		                alert(response);
-		                if (row) {
-		                    row.remove();
-		                }
-		            },
-		            error: function(xhr, status, error) {
-		                alert("Đã xảy ra lỗi khi " + status + " yêu cầu: " + error);
-		            }
-		        });
-		    }
 			
 			function fetchNotes(requestId, notesInput) {
 			    $.ajax({
@@ -609,8 +590,9 @@
 		    $('#requestTableBody tr').each(function() {
 		        var checkbox = $(this).find('input[type="checkbox"]');
 		        if (checkbox.is(':checked')) {
-		            var row = $(this); // Lưu trữ dòng hiện tại để xóa sau này
+		            var row = $(this);
 		            const requestId = parseInt(row.find('.reqId').text());
+					console.log(requestId + " " + typeof requestId);
 		            var notes = row.find('.note input').val();
 
 		            var requestData = {
@@ -646,7 +628,6 @@
 		                    console.error("Đã xảy ra lỗi khi chuyển yêu cầu: " + error);
 		                }
 		            });
-					alert('Chuyển giao thành công!');
 		        }
 		    });
 		}

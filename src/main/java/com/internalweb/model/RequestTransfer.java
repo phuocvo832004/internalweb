@@ -12,9 +12,8 @@ public class RequestTransfer {
     @Column(name = "Transfer_ID")
     private Long transferId;
     
-    @ManyToOne
-    @JoinColumn(name = "Request_ID")
-    private Request request;
+    @Column(name = "Request_ID")
+    private Long requestId;
     
     @Column(name = "Transferred_By")
     private String transferredBy;
@@ -33,16 +32,36 @@ public class RequestTransfer {
 		// TODO Auto-generated constructor stub
 	}
 
-	public RequestTransfer(Long transferId, Request request, String transferredBy, String receivedBy, Date transferDate,
-			String notes) {
+
+	
+	
+	public RequestTransfer(Long transferId, Long requestId, String transferredBy, String receivedBy,
+			Date transferDate, String notes) {
 		super();
 		this.transferId = transferId;
-		this.request = request;
+		this.requestId = requestId;
 		this.transferredBy = transferredBy;
 		this.receivedBy = receivedBy;
 		this.transferDate = transferDate;
 		this.notes = notes;
 	}
+
+
+
+
+	public Long getRequestId() {
+		return requestId;
+	}
+
+
+
+
+	public void setRequestId(Long requestId) {
+		this.requestId = requestId;
+	}
+
+
+
 
 	public Long getTransferId() {
 		return transferId;
@@ -50,14 +69,6 @@ public class RequestTransfer {
 
 	public void setTransferId(Long transferId) {
 		this.transferId = transferId;
-	}
-
-	public Request getRequest() {
-		return request;
-	}
-
-	public void setRequest(Request request) {
-		this.request = request;
 	}
 
 	public String getTransferredBy() {
